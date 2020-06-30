@@ -1,0 +1,37 @@
+body {
+    font-family: tahoma, sans-serif;
+    text-align: center;
+    background: #404040;
+    color: #DCDCDC;
+    font-size: 18pt;
+}
+
+header {
+    font-size: 30pt;
+    color: orange;
+    margin-bottom: 30px;
+}
+
+.label {
+    font-size: 24pt;
+    color: orange;
+}
+
+.input {
+    font-size: 16pt;
+}
+
+.submit {
+    font-size: 18pt;
+    margin: 25px;
+}
+
+.smallSubmit {
+    font-size: 16pt;
+    margin: 5px;
+}
+
+#quizesSelect {
+    font-size: 16pt;
+    margin-top: 20px;
+}

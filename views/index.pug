@@ -1,0 +1,21 @@
+extends layout
+
+block content
+
+    header Quizes!
+
+    p#loginMessage You are logged in as #{user}.
+
+    form(method='POST', action='/logout/')
+
+        input(type="hidden" name="_csrf" value=csrfToken)  
+
+        button.smallSubmit(type="submit") Logout
+        
+    form(method='GET', action='/change-password/')
+
+        button.smallSubmit(type="submit") Change password
+    
+    form(method='GET', action='/quiz-list.html')
+
+        button.submit(type="submit") Go to quizes list
