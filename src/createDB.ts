@@ -4,7 +4,7 @@ import { DATABASE_NAME } from './config';
 
 const database = new sqlite.Database(DATABASE_NAME);
 
-createUsersTableIfNeeded(database).then(() => createQuizesTableIfNeeded(database)).then(() => createQuestionsTableIfNeeded(database)).then(() => createTimersTableIfNeeded(database));
+createUsersTableIfNeeded(database).then(() => createQuizesTableIfNeeded(database)).then(() => createQuestionsTableIfNeeded(database)).then(() => createTimersTableIfNeeded(database)).then(() => createAnswersTableIfNeeded(database)).then(() => createScoresTableIfNeeded(database));
 
 function createUsersTableIfNeeded(db: sqlite.Database): Promise<void> {
     console.log('Checking table users');
@@ -142,6 +142,73 @@ function createTimersTableIfNeeded(db: sqlite.Database): Promise<void> {
               quiz_id INTEGER,
               user TEXT,
               start INTEGER
+              );`, [], (err: Error) => {
+                if (err) {
+                    reject('DB Error during table creation');
+                    return;
+                }
+
+                console.log('Done.');
+                resolve();
+            });
+        });
+    });
+}
+
+function createAnswersTableIfNeeded(db: sqlite.Database): Promise<void> {
+    console.log('Checking table answers');
+    return new Promise((resolve, reject) => {
+        db.get('SELECT COUNT(*) AS cnt FROM sqlite_master WHERE type="table" and name="answers";', (err, row) => {
+            if (err) {
+                reject('DB Error during table search');
+                return;
+            }
+
+            if (row.cnt === 1) {
+                console.log('Database table already exists.');
+                resolve();
+                return;
+            }
+
+            console.log('Creating table answers...');
+            db.run(`CREATE TABLE answers (
+              question_id INTEGER,
+              user TEXT,
+              answer INTEGER,
+              time_spent INTEGER
+              );`, [], (err: Error) => {
+                if (err) {
+                    reject('DB Error during table creation');
+                    return;
+                }
+
+                console.log('Done.');
+                resolve();
+            });
+        });
+    });
+}
+
+function createScoresTableIfNeeded(db: sqlite.Database): Promise<void> {
+    console.log('Checking table scores');
+    return new Promise((resolve, reject) => {
+        db.get('SELECT COUNT(*) AS cnt FROM sqlite_master WHERE type="table" and name="scores";', (err, row) => {
+            if (err) {
+                reject('DB Error during table search');
+                return;
+            }
+
+            if (row.cnt === 1) {
+                console.log('Database table already exists.');
+                resolve();
+                return;
+            }
+
+            console.log('Creating table scores...');
+            db.run(`CREATE TABLE scores (
+              quiz_id INTEGER,
+              user TEXT,
+              score INTEGER
               );`, [], (err: Error) => {
                 if (err) {
                     reject('DB Error during table creation');

@@ -15,6 +15,8 @@ let timer: undefined | NodeJS.Timeout;
 
 let questions: Question[] = [];
 
+let csrfToken: string = undefined;
+
 const urlParams = new URLSearchParams(window.location.search);
 
 function updateSubmitButton(): void {
@@ -106,13 +108,25 @@ function destroyTimer(): void {
 
 const loadQuestions = async (): Promise<Question[]> => {
     return new Promise((resolve, reject) => {
+        fetch('/quiz/' + urlParams.get('id'), {
+        }).then((data) => {
+            csrfToken = data.headers.get('CSRF-Header');
 
-        fetch('/quiz/' + urlParams.get('id')).then(async (data) => {
-            const questions: Question[] = await data.json();
-            resolve(questions);
+            fetch('/quiz/' + urlParams.get('id'), {
+                method: 'POST',
+                headers: {
+                    'CSRF-Token': csrfToken
+                }
+            }).then(async (data) => {
+                const questions: Question[] = await data.json();
+                resolve(questions);
 
+            }, (reason) => {
+                console.log('Error while fetching questions: ', reason);
+                reject();
+            });
         }, (reason) => {
-            console.log('Error while fetching questions: ', reason);
+            console.log('Error while fetching CSRF token: ', reason);
             reject();
         });
     });
@@ -157,12 +171,13 @@ function submitQuiz(): void {
     const finalAnswers: Answer[] = Array(questions.length);
 
     for (let i = 0; i < questions.length; i++)
-        finalAnswers[i] = { answer: parseInt(answers[i]), timeSpent: timers[i] / timeSum };
+        finalAnswers[i] = { answer: parseInt(answers[i]), timeSpent: timers[i] / timeSum, question_id: questions[i].id };
 
-    fetch('/quiz/' + urlParams.get('id'), {
+    fetch('/answers/' + urlParams.get('id'), {
         method: 'POST',
         headers: {
-            'Content-type': 'application/json'
+            'Content-type': 'application/json',
+            'CSRF-Token': csrfToken
         },
         body: JSON.stringify(finalAnswers)
     }).then(response => {
@@ -170,41 +185,6 @@ function submitQuiz(): void {
             window.location.href = response.url;
         }
     });
-
-    // const quizArea = document.getElementById('quizArea') as HTMLDivElement;
-
-    // quizArea.innerHTML = `
-    // <table id="answers">
-    //     <thead>
-    //         <th>Question</th>
-    //         <th>Your answer</th>
-    //         <th>Correct answer</th>
-    //         <th>Time Spent</th>
-    //     </thead>
-    // </table>
-    // <p id="scoreLine">Your score: <span id="score">0s</span><br>`;
-
-    // let score = timeSum;
-
-    // const submittedAnswers = document.getElementById('answers') as HTMLParagraphElement;
-    // for (let i = 0; i < questions.length; i++) {
-    //     const question = questions[i];
-
-    //     let newRow = '<tr><td>' + question.text + '</td><td>' + answers[i] + '</td>';
-    //     if (parseInt(answers[i], 10) === question.correctAnswer) {
-    //         newRow += '<td class="correct">✓</td>';
-    //         newRow += '<td>' + displayTime(timers[i]) + '</td></tr>';
-    //     }
-    //     else {
-    //         score += question.penalty;
-    //         newRow += '<td class="wrong">' + question.correctAnswer + '</td>';
-    //         newRow += '<td>' + displayTime(timers[i]) + '<span class="wrong"> + ' + displayTime(question.penalty) + '</span></td></tr>';
-    //     }
-
-    //     submittedAnswers.innerHTML += newRow;
-    // }
-
-    // document.getElementById('score').innerText = displayTime(score);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

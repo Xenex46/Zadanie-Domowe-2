@@ -11,7 +11,9 @@ import { changePasswordGet, ChangePasswordPost } from './routers/changePassword'
 import { Users } from './users';
 import { Database } from 'sqlite3';
 import { QuizListGet } from './routers/quizList';
-import { quizGet, quizPost } from './routers/quiz';
+import { quizPost, quizGet } from './routers/quiz';
+import { answersPost } from './routers/answers';
+import { resultsGet as resultsGet } from './routers/results';
 
 const SQLiteStore = require('connect-sqlite3')(session);
 
@@ -32,7 +34,9 @@ app.use(session({
     secret: SESSION_SECRET,
     store: new SQLiteStore({
         db: DATABASE_NAME
-    })
+    }),
+    resave: false,
+    saveUninitialized: true
 }));
 
 
@@ -74,9 +78,13 @@ app.post('/change-password', csrfProtection, ChangePasswordPost);
 
 app.get('/quiz-list', QuizListGet);
 
-app.get('/quiz/:quizId(\\d+)', quizGet);
+app.get('/quiz/:quizId(\\d+)', csrfProtection, quizGet);
 
-app.post('/quiz/:quizId(\\d+)', quizPost);
+app.post('/quiz/:quizId(\\d+)', csrfProtection, quizPost);
+
+app.post('/answers/:quizId(\\d+)', csrfProtection, answersPost);
+
+app.get('/results/:quizId(\\d+)', resultsGet);
 
 app.use((req, res) => {
     res.render('error');

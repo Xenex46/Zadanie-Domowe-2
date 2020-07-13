@@ -31,7 +31,33 @@ header {
     margin: 5px;
 }
 
-#quizesSelect {
+.correct {
+    color: green;
+}
+
+.wrong {
+    color: red;
+}
+
+.quizSelect {
     font-size: 16pt;
     margin-top: 20px;
+}
+
+#answers {
+    margin: auto;
+    font-size: 20px;
+    text-align: center;
+}
+
+#answers th {
+    padding: 5px;
+}
+
+#answers td {
+    padding: 5px;
+}
+
+#leaderboard h1 {
+    font-size: 30pt;
 }

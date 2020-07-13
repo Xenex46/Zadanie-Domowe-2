@@ -24,6 +24,19 @@ export class Timer {
         });
     }
 
+    async getTime(quizId: number, user: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            this.db.get(`SELECT start FROM timers WHERE quiz_id=${quizId} and user="${user}"`, (err, row) => {
+                if (err) {
+                    console.log('DB Error during timer get: ', err);
+                    reject();
+                }
+
+                resolve(row.start);
+            });
+        });
+    }
+
     saveTime(quizId: number, user: string): void {
         this.timeExists(quizId, user).then((exists) => {
             if (!exists)

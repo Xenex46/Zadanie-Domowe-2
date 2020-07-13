@@ -5,6 +5,11 @@ export interface Quiz {
     name: string;
 }
 
+export interface QuizLists {
+    quizes: Quiz[],
+    results: Quiz[];
+}
+
 export class Quizes {
 
     db: sqlite.Database;
@@ -13,15 +18,22 @@ export class Quizes {
         this.db = dbInit;
     }
 
-    async getQuizList(user: string): Promise<Quiz[]> {
+    async getQuizList(user: string): Promise<QuizLists> {
         return new Promise((resolve, reject) => {
-            this.db.all(`SELECT id, name FROM quizes EXCEPT SELECT quiz_id, name FROM timers INNER JOIN quizes on timers.quiz_id = quizes.id WHERE user = "${user}";`, (err, rows) => {
+            this.db.all('SELECT id, name FROM quizes EXCEPT SELECT id, name FROM quizes INNER JOIN scores on scores.quiz_id = quizes.id WHERE user = ?;', user, (err, quizes) => {
                 if (err) {
                     console.log('DB Error during quiz list get:', err);
                     reject();
                 }
 
-                resolve(rows);
+                this.db.all('SELECT id, name FROM quizes INNER JOIN scores on scores.quiz_id = quizes.id WHERE user = ?;', user, (err, results) => {
+                    if (err) {
+                        console.log('DB Error during results list get:', err);
+                        reject();
+                    }
+
+                    resolve({ quizes, results });
+                });
             });
         });
     }
